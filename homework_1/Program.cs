@@ -41,25 +41,91 @@ Console.WriteLine();
 #endregion
 
 #region Task-2
-string[] GetArrayFromString(string sourceString, string separator)
+int[] GetArrayOfIndexes(string sourceString, string separator)
 {
-    string[] newArray = { };
-    void GetSubString()
+    if (separator.Length > sourceString.Length)
     {
-        int index = sourceString.IndexOf(separator);
-        if (index > 0)
+        return new int[0];
+    }
+    int arrayLength = 0;
+    for(int i = 0;  i < sourceString.Length; i++)
+    {
+        if (sourceString[i] == separator[0])
         {
-            string subString = sourceString.Substring(0, index);
-            newArray = newArray.Append(subString).ToArray();
-            sourceString = sourceString.Remove(0, subString.Length + 1);
-            GetSubString();
-        }
-        else if (sourceString.Length > 0)
-        {
-            newArray = newArray.Append(sourceString).ToArray();
+            if (separator.Length == 1)
+            {
+                arrayLength++;
+            } else
+            {
+                for (int j = 1; j < separator.Length; j++)
+                {
+                    if (separator[j] != sourceString[i + j])
+                    {
+                        break;
+                    }
+                    if (j == separator.Length - 1)
+                    {
+                        arrayLength++;
+                    }
+                }
+            }
         }
     }
-    GetSubString();
+    int[] arrayOfIndexes = new int[arrayLength];
+
+    int currentIndex = 0;
+    for (int i = 0; i < sourceString.Length; i++)
+    {
+        if (sourceString[i] == separator[0])
+        {
+            if (separator.Length == 1)
+            {
+                arrayOfIndexes[currentIndex] = i;
+                currentIndex++;
+            }
+            else
+            {
+                for (int j = 1; j < separator.Length; j++)
+                {
+                    if (separator[j] != sourceString[i + j])
+                    {
+                        break;
+                    }
+                    if (j == separator.Length - 1)
+                    {
+                        arrayOfIndexes[currentIndex] = i;
+                        currentIndex++;
+                    }
+                }
+            }
+        }
+    }
+
+    return arrayOfIndexes;
+}
+string[] GetArrayFromString(string sourceString, string separator)
+{
+    if (separator.Length > sourceString.Length)
+    {
+        return new string[0];
+    }
+    int[] arrayOfIndexes = GetArrayOfIndexes(sourceString, separator);
+    string[] newArray = new string[arrayOfIndexes.Length + 1];
+    for (int i = 0; i < arrayOfIndexes.Length; i++)
+    {
+        if (i == 0)
+        {
+            newArray[i] = sourceString.Substring(0, arrayOfIndexes[i]);
+        } else
+        {
+            newArray[i] = sourceString.Substring(arrayOfIndexes[i - 1] + 1, arrayOfIndexes[i] - arrayOfIndexes[i - 1] - 1);
+
+            if (i == arrayOfIndexes.Length - 1)
+            {
+                newArray[i + 1] = sourceString.Substring(arrayOfIndexes[i] + 1, sourceString.Length - arrayOfIndexes[i] - 1);
+            }
+        } 
+    }
     return newArray;
 }
 
@@ -92,28 +158,11 @@ string ReadString(string message)
     }
 
 }
-int[] GetArrayOfIndexSubStr(string sourceString, string subStr)
-{
-    int[] newArray = { };
-    void GetIndexOfSubStr()
-    {
-        int index = sourceString.IndexOf(subStr);
-        if (index > -1)
-        {
-            int subStrIndex = newArray.Length > 0 ? index + newArray[newArray.Length - 1] + subStr.Length : index;
-            newArray = newArray.Append(subStrIndex).ToArray();
-            sourceString = sourceString.Remove(0, index + subStr.Length);
-            GetIndexOfSubStr();
-        }
-    }
-    GetIndexOfSubStr();
-    return newArray;
-}
 
 Console.WriteLine("Пошук підстроки у строці.");
 string sourcestring = ReadString("Enter string: ");
 string substr = ReadString("Enter sub string: ");
-int[] indexesofsubstr = GetArrayOfIndexSubStr(sourcestring, substr);
+int[] indexesofsubstr = GetArrayOfIndexes(sourcestring, substr);
 Console.WriteLine($"Array of index: {string.Join(",", indexesofsubstr)}");
 Console.WriteLine();
 #endregion
