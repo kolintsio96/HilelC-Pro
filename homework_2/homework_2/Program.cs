@@ -182,15 +182,12 @@ internal class Program
         {
             return !(Char.ToUpper(symbol) >= 'A' && Char.ToUpper(symbol) <= 'Z');
         }
-        int counter = 0;
         for (int i = 0; i < charArray.Length; i++)
         {
-            counter++;
             bool isStartOfWord = ((i != 0 && NotChar(charArray[i - 1])) || i == 0);
-            bool matched = false;
             if (isStartOfWord)
             {
-                matched = false;
+                bool matched = false;
                 for (int j = 0; j < exceptWords.Length; j++)
                 {
                     if (matched) break;
@@ -216,7 +213,6 @@ internal class Program
                 }
             }
         }
-        Console.WriteLine(counter);
         return new string(charArray);
     }
 
