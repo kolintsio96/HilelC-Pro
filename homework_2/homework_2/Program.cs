@@ -184,21 +184,27 @@ internal class Program
         }
         for (int i = 0; i < charArray.Length; i++)
         {
+            // start of word in string
             bool isStartOfWord = ((i != 0 && NotChar(charArray[i - 1])) || i == 0);
             if (isStartOfWord)
             {
                 bool matched = false;
                 for (int j = 0; j < exceptWords.Length; j++)
                 {
+                    //if matched skip all other except words
                     if (matched) break;
                     
                     for (int k = 0; k < exceptWords[j].Length; k++)
                     {
+                        //skip if except word more then word in string or char are not equal
                         if ((i + k) >= (charArray.Length) || charArray[i + k] != exceptWords[j][k]) break;
 
+                        //end of word in string
                         bool isEndOfWord = (((i + k) != (charArray.Length - 1) && NotChar(charArray[i + k + 1])) || (i + k) == (charArray.Length - 1));
+                        // end of except word
                         bool isEndOfExpectWord = ((k != (exceptWords[j].Length - 1) && NotChar(exceptWords[j][k + 1])) || k == (exceptWords[j].Length - 1));
 
+                        
                         if (isEndOfWord && isEndOfExpectWord)
                         {
                             matched = true;
@@ -206,6 +212,8 @@ internal class Program
                             {
                                 charArray[w] = symbol;
                             }
+
+                            //go to other word in string
                             i = exceptWords[j].Length + i;
                             break;
                         }
