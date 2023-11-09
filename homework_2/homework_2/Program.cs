@@ -1,8 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-using System.Text;
-using static System.Net.Mime.MediaTypeNames;
-
-internal class Program
+﻿internal class Program
 {
     private static void Main(string[] args)
     {
