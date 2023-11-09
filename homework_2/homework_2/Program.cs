@@ -18,10 +18,7 @@ internal class Program
         Console.WriteLine("Фільтрування неприпустимих слів у строці. Має бути саме слова, а не частини слів.");
         string[] exceptWords = { "fuck", "fucking", "ass" };
         string str2 = ReadString("Enter string: ");
-        var sw = Stopwatch.StartNew();
         string filteredString = FilterExceptWords(str2, exceptWords);
-        sw.Stop();
-        Console.WriteLine(sw.Elapsed);
         Console.WriteLine($"String: {str2}");
         Console.WriteLine($"Filtered string {filteredString}");
         Console.WriteLine();
@@ -185,9 +182,11 @@ internal class Program
         {
             return !(Char.ToUpper(symbol) >= 'A' && Char.ToUpper(symbol) <= 'Z');
         }
+        int counter = 0;
         for (int i = 0; i < charArray.Length; i++)
         {
-            bool isStartOfWord = ((i != 0 && NotChar(sourceString[i - 1])) || i == 0);
+            counter++;
+            bool isStartOfWord = ((i != 0 && NotChar(charArray[i - 1])) || i == 0);
             bool matched = false;
             if (isStartOfWord)
             {
@@ -198,9 +197,9 @@ internal class Program
                     
                     for (int k = 0; k < exceptWords[j].Length; k++)
                     {
-                        if ((i + k) >= (sourceString.Length) || sourceString[i + k] != exceptWords[j][k]) break;
+                        if ((i + k) >= (charArray.Length) || charArray[i + k] != exceptWords[j][k]) break;
 
-                        bool isEndOfWord = (((i + k) != (sourceString.Length - 1) && NotChar(sourceString[i + k + 1])) || (i + k) == (sourceString.Length - 1));
+                        bool isEndOfWord = (((i + k) != (charArray.Length - 1) && NotChar(charArray[i + k + 1])) || (i + k) == (charArray.Length - 1));
                         bool isEndOfExpectWord = ((k != (exceptWords[j].Length - 1) && NotChar(exceptWords[j][k + 1])) || k == (exceptWords[j].Length - 1));
 
                         if (isEndOfWord && isEndOfExpectWord)
@@ -210,11 +209,14 @@ internal class Program
                             {
                                 charArray[w] = symbol;
                             }
+                            i = exceptWords[j].Length + i;
+                            break;
                         }
                     }
                 }
             }
         }
+        Console.WriteLine(counter);
         return new string(charArray);
     }
 
