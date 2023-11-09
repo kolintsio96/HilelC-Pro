@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.Metrics;
+using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
 internal class Program
@@ -34,7 +35,7 @@ internal class Program
 
         #region Task-4
         Console.WriteLine("'Дірка' (пропущене число) у масиві.");
-        int[] array = { 1, 2, 3, 4, 6, 7, 8, 0, 9, 5 };
+        int[] array = { 1, 2, 3, 4, 6, 7, 0, 9, 5 };
         int missingNumber = FindMissingNumber(array);
         Console.WriteLine($"Array of numbers: {string.Join(",", array)}");
         Console.WriteLine("Missing number: " + missingNumber);
@@ -86,7 +87,7 @@ internal class Program
         return new string(bytes);
     }
 
-    private static List<int> CompessDna(string dna, bool compress = false)
+    private static List<int> CompessDna(string dna)
     {
         List<int> bytesList = new List<int>();
         int b = 0;
@@ -109,7 +110,7 @@ internal class Program
                     break;
             }
             
-            if ((i + 1) % 4 == 0)
+            if ((i + 1) % 4 == 0 || i == dna.Length - 1)
             {
                 bytesList.Add(b);
                 b = 0;
@@ -145,6 +146,7 @@ internal class Program
                         break;
                 }
                 b = b >> 2;
+                if (b == 0) break;
             }
         }
         return string.Join("", charList);
@@ -178,16 +180,36 @@ internal class Program
     {
         char[] charArray = sourceString.ToCharArray();
         char symbol = '*';
-        for (int i = 0; i < exceptWords.Length; i++)
+        bool notChar(char symbol)
         {
-            int[] indexesOfExpectWords = GetArrayOfIndexes(sourceString, exceptWords[i]);
-            if(indexesOfExpectWords.Length > 0)
+            return !(Char.ToUpper(symbol) >= 'A' && Char.ToUpper(symbol) <= 'Z');
+        }
+        for (int i = 0; i < charArray.Length; i++)
+        {
+            bool isStartOfWord = ((i != 0 && notChar(sourceString[i - 1])) || i == 0);
+            bool matched = false;
+            if (isStartOfWord)
             {
-                for (int j = 0; j < indexesOfExpectWords.Length; j++)
+                matched = false;
+                for (int j = 0; j < exceptWords.Length; j++)
                 {
-                    for(int k = 0; k < exceptWords[i].Length; k++)
+                    if (matched) break;
+                    
+                    for (int k = 0; k < exceptWords[j].Length; k++)
                     {
-                        charArray[indexesOfExpectWords[j] + k] = symbol;
+                        if ((i + k) >= (sourceString.Length) || sourceString[i + k] != exceptWords[j][k]) break;
+
+                        bool isEndOfWord = (((i + k) != (sourceString.Length - 1) && notChar(sourceString[i + k + 1])) || (i + k) == (sourceString.Length - 1));
+                        bool isEndOfExpectWord = ((k != (exceptWords[j].Length - 1) && notChar(exceptWords[j][k + 1])) || k == (exceptWords[j].Length - 1));
+
+                        if (isEndOfWord && isEndOfExpectWord)
+                        {
+                            matched = true;
+                            for (int w = i; w < (exceptWords[j].Length +  i); w++)
+                            {
+                                charArray[w] = symbol;
+                            }
+                        }
                     }
                 }
             }
@@ -227,84 +249,6 @@ internal class Program
         return new string(charArray);
     }
 
-    private static int[] GetArrayOfIndexes(string sourceString, string subStr)
-    {
-        bool notChar(char symbol)
-        {
-            return !(Char.ToUpper(symbol) >= 'A' && Char.ToUpper(symbol) <= 'Z');    
-        }
-        if (subStr.Length > sourceString.Length)
-        {
-            return new int[0];
-        }
-        int arrayLength = 0;
-        for (int i = 0; i < sourceString.Length; i++)
-        {
-            bool isStartOfWord = ((i != 0 && notChar(sourceString[i - 1])) || i == 0);
-            bool isEndOfWord = ((i + subStr.Length - 1) == sourceString.Length - 1) || ((i + subStr.Length) < sourceString.Length - 1 && notChar(sourceString[i + subStr.Length]));
-            
-            if (Char.ToUpper(sourceString[i]) == Char.ToUpper(subStr[0]) && isStartOfWord && isEndOfWord)
-            {
-                if (subStr.Length == 1)
-                {
-                    arrayLength++;
-                }
-                else
-                {
-                    for (int j = 1; j < subStr.Length; j++)
-                    {
-                        
-                        if (subStr[j] != sourceString[i + j])
-                        {
-                            break;
-                        }
-                        
-                        if (j == subStr.Length - 1)
-                        {
-                            arrayLength++;
-                        }
-                    }
-                }
-            }
-        }
-        int[] arrayOfIndexes = new int[arrayLength];
-
-        int currentIndex = 0;
-        for (int i = 0; i < sourceString.Length; i++)
-        {
-            bool isStartOfWord = ((i != 0 && notChar(sourceString[i - 1])) || i == 0);
-            bool isEndOfWord = ((i + subStr.Length - 1) == sourceString.Length - 1) || ((i + subStr.Length) < sourceString.Length - 1 && notChar(sourceString[i + subStr.Length]));
-
-            if (sourceString[i] == subStr[0] && isStartOfWord && isEndOfWord)
-            {
-                if (subStr.Length == 1)
-                {
-                    arrayOfIndexes[currentIndex] = i;
-                    currentIndex++;
-                }
-                else
-                {
-                    for (int j = 1; j < subStr.Length; j++)
-                    {
-
-                        if (subStr[j] != sourceString[i + j])
-                        {
-                            break;
-                        }
-
-                        if (j == subStr.Length - 1)
-                        {
-                            arrayOfIndexes[currentIndex] = i;
-                            currentIndex++;
-                        }
-                    }
-                }
-            }
-        }
-       
-        return arrayOfIndexes;
-    }
-
     private static int ReadNumber(string message)
     {
         Console.Write(message);
@@ -327,18 +271,15 @@ internal class Program
     
     private static int FindMissingNumber(int[] array)
     {
-        int xorSum = 0;
+        int totalSumm = array.Length;
+        int result = 0;
 
         for (int i = 0; i < array.Length; i++)
         {
-            xorSum ^= array[i];
+            totalSumm += i;
+            result += array[i];
         }
 
-        for (int i = 1; i <= array.Length; i++)
-        {
-            xorSum ^= i;
-        }
-
-        return xorSum;
+        return totalSumm - result ;
     }
 }
