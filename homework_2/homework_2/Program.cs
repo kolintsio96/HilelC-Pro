@@ -1,4 +1,6 @@
-﻿internal class Program
+﻿using System.Diagnostics;
+
+internal class Program
 {
     private static void Main(string[] args)
     {
@@ -16,7 +18,10 @@
         Console.WriteLine("Фільтрування неприпустимих слів у строці. Має бути саме слова, а не частини слів.");
         string[] exceptWords = { "fuck", "fucking", "ass" };
         string str2 = ReadString("Enter string: ");
+        var sw = Stopwatch.StartNew();
         string filteredString = FilterExceptWords(str2, exceptWords);
+        sw.Stop();
+        Console.WriteLine(sw.Elapsed);
         Console.WriteLine($"String: {str2}");
         Console.WriteLine($"Filtered string {filteredString}");
         Console.WriteLine();
@@ -176,13 +181,13 @@
     {
         char[] charArray = sourceString.ToCharArray();
         char symbol = '*';
-        bool notChar(char symbol)
+        bool NotChar(char symbol)
         {
             return !(Char.ToUpper(symbol) >= 'A' && Char.ToUpper(symbol) <= 'Z');
         }
         for (int i = 0; i < charArray.Length; i++)
         {
-            bool isStartOfWord = ((i != 0 && notChar(sourceString[i - 1])) || i == 0);
+            bool isStartOfWord = ((i != 0 && NotChar(sourceString[i - 1])) || i == 0);
             bool matched = false;
             if (isStartOfWord)
             {
@@ -195,8 +200,8 @@
                     {
                         if ((i + k) >= (sourceString.Length) || sourceString[i + k] != exceptWords[j][k]) break;
 
-                        bool isEndOfWord = (((i + k) != (sourceString.Length - 1) && notChar(sourceString[i + k + 1])) || (i + k) == (sourceString.Length - 1));
-                        bool isEndOfExpectWord = ((k != (exceptWords[j].Length - 1) && notChar(exceptWords[j][k + 1])) || k == (exceptWords[j].Length - 1));
+                        bool isEndOfWord = (((i + k) != (sourceString.Length - 1) && NotChar(sourceString[i + k + 1])) || (i + k) == (sourceString.Length - 1));
+                        bool isEndOfExpectWord = ((k != (exceptWords[j].Length - 1) && NotChar(exceptWords[j][k + 1])) || k == (exceptWords[j].Length - 1));
 
                         if (isEndOfWord && isEndOfExpectWord)
                         {
