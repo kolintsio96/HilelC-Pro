@@ -184,8 +184,8 @@ internal class Program
         }
         for (int i = 0; i < charArray.Length; i++)
         {
-            // start of word in string
             bool isStartOfWord = ((i != 0 && NotChar(charArray[i - 1])) || i == 0);
+            // skip char if it not begin of word
             if (isStartOfWord)
             {
                 bool matched = false;
@@ -199,12 +199,9 @@ internal class Program
                         //skip if except word more then word in string or char are not equal
                         if ((i + k) >= (charArray.Length) || charArray[i + k] != exceptWords[j][k]) break;
 
-                        //end of word in string
                         bool isEndOfWord = (((i + k) != (charArray.Length - 1) && NotChar(charArray[i + k + 1])) || (i + k) == (charArray.Length - 1));
-                        // end of except word
                         bool isEndOfExpectWord = ((k != (exceptWords[j].Length - 1) && NotChar(exceptWords[j][k + 1])) || k == (exceptWords[j].Length - 1));
 
-                        
                         if (isEndOfWord && isEndOfExpectWord)
                         {
                             matched = true;
