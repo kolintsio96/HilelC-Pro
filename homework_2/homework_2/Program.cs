@@ -171,6 +171,7 @@ internal class Program
             int index = random.Next(65, 122);
             charArray[i] = (char)index;
         }
+        Array.Sort(charArray);
         return new string(charArray);
     }
 
