@@ -1,6 +1,4 @@
-﻿using BlackJack;
-
-namespace BankAccount
+﻿namespace Game
 {
     class Program
     {
@@ -38,6 +36,12 @@ namespace BankAccount
             cards.Sort();
             cards.PrintCards();
             Console.WriteLine();
+            #endregion
+
+            #region task-6
+            //Створіть консольну програму для карткової гри «21»
+            BlackJack blackJack = new BlackJack();
+            blackJack.Play();
             #endregion
         }
     }

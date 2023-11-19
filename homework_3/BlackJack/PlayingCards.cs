@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BlackJack
+﻿namespace Game
 {
     readonly struct Card
     {
@@ -32,10 +30,13 @@ namespace BlackJack
                 case Denominations.Nine:
                     return 9;
                 case Denominations.Ten:
-                case Denominations.Jack:
-                case Denominations.Queen:
-                case Denominations.King:
                     return 10;
+                case Denominations.Jack:
+                    return 2;
+                case Denominations.Queen:
+                    return 3;
+                case Denominations.King:
+                    return 4;
                 case Denominations.Ace:
                     return 11;
                 default:
