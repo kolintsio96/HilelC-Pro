@@ -2,12 +2,12 @@
 {
     internal class BlackJack
     {
-        PlayingCards playingCards = new PlayingCards();
-        List<Card> user = new List<Card>();
-        List<Card> computer = new List<Card>();
+        Deck deck = new Deck();
+        Player user = new Player();
+        Player computer = new Player();
         List<string> statistics = new List<string>();
-        List<Card> player1;
-        List<Card> player2;
+        Player player1;
+        Player player2;
 
         int currentIndex = 4;
         bool userStopped = false;
@@ -17,8 +17,8 @@
         {
             Console.Clear();
 
-            playingCards.OverhandShuffle();
-            Card[] cards = playingCards.GetCards();
+            deck.OverhandShuffle();
+            Card[] cards = deck.cards;
 
             Team team = ChoosePlayer();
             bool isUser = team.Equals(Team.User);
@@ -26,10 +26,10 @@
             player1 = isUser ? user : computer;
             player2 = isUser ? computer : user;
 
-            player1.Add(cards[0]);
-            player1.Add(cards[1]);
-            player2.Add(cards[2]);
-            player2.Add(cards[3]);
+            player1.AddCard(cards[0]);
+            player1.AddCard(cards[1]);
+            player2.AddCard(cards[2]);
+            player2.AddCard(cards[3]);
 
             while (!(userStopped && computerStopped))
             {
@@ -63,24 +63,24 @@
             computerStopped = false;
             currentIndex = 4;
         }
-        private void ShowResult(List<Card> player1, List<Card> player2, bool isUser)
+        private void ShowResult(Player player1, Player player2, bool isUser)
         {
-            Console.WriteLine($"{(isUser ? "User" : "Computer")} - {CountPoints(player1)} points!");
-            Console.WriteLine($"{(isUser ? "Computer" : "User")} - {CountPoints(player2)} points!");
+            Console.WriteLine($"{(isUser ? "User" : "Computer")} - {player1.CountPoints()} points!");
+            Console.WriteLine($"{(isUser ? "Computer" : "User")} - {player2.CountPoints()} points!");
 
-            if (CountPoints(player1) <= 21 && CountPoints(player2) > 21)
+            if (player1.CountPoints() <= 21 && player2.CountPoints() > 21)
             {
                 Console.WriteLine($"{(isUser ? "User" : "Computer")} - Win!");
                 statistics.Add($"{(isUser ? "User" : "Computer")} - Win!");
             }
-            else if (CountPoints(player2) <= 21 && CountPoints(player1) > 21)
+            else if (player2.CountPoints() <= 21 && player1.CountPoints() > 21)
             {
                 Console.WriteLine($"{(isUser ? "Computer" : "User")} - Win!");
                 statistics.Add($"{(isUser ? "Computer" : "User")} - Win!");
             }
-            else if (CountPoints(player1) > 21 && CountPoints(player2) > 21)
+            else if (player1.CountPoints() > 21 && player2.CountPoints() > 21)
             {
-                if (CountPoints(player1) < CountPoints(player2))
+                if (player1.CountPoints() < player2.CountPoints())
                 {
                     Console.WriteLine($"{(isUser ? "User" : "Computer")} - Win!");
                     statistics.Add($"{(isUser ? "User" : "Computer")} - Win!");
@@ -91,12 +91,12 @@
                     statistics.Add($"{(isUser ? "Computer" : "User")} - Win!");
                 }
             }
-            else if (CountPoints(player1) > CountPoints(player2))
+            else if (player1.CountPoints() > player2.CountPoints())
             {
                 Console.WriteLine($"{(isUser ? "User" : "Computer")} - Win!");
                 statistics.Add($"{(isUser ? "User" : "Computer")} - Win!");
             }
-            else if (CountPoints(player1) < CountPoints(player2))
+            else if (player1.CountPoints() < player2.CountPoints())
             {
                 Console.WriteLine($"{(isUser ? "Computer" : "User")} - Win!");
                 statistics.Add($"{(isUser ? "Computer" : "User")} - Win!");
@@ -108,17 +108,17 @@
             }
             Console.ReadLine();
         }
-        private void PlayUser(List<Card> player, Card[] cards)
+        private void PlayUser(Player player, Card[] cards)
         {
-            Console.WriteLine($"You have {CountPoints(player)} points!");
-            if (!userStopped && CountPoints(player) < 20)
+            Console.WriteLine($"You have {player.CountPoints()} points!");
+            if (!userStopped && player.CountPoints() < 20)
             {
                 Command input = ReadCommand();
 
                 switch (input)
                 {
                     case Command.Get:
-                        player.Add(cards[currentIndex]);
+                        player.AddCard(cards[currentIndex]);
                         currentIndex++;
                         break;
                     case Command.Stop:
@@ -134,26 +134,17 @@
                 userStopped = true;
             }
         }
-        private void PlayComputer(List<Card> player, Card[] cards)
+        private void PlayComputer(Player player, Card[] cards)
         {
-            if (CountPoints(player) > 17)
+            if (player.CountPoints() > 17)
             {
                 Console.WriteLine("Computer passed!");
                 computerStopped = true;
             } else
             {
-                player.Add(cards[currentIndex]);
+                player.AddCard(cards[currentIndex]);
                 currentIndex++;
             }
-        }
-        private int CountPoints(List<Card> player)
-        {
-            int points = 0;
-            foreach (Card card in player)
-            {
-                points += card.Point;
-            }
-            return points;
         } 
         private void ShowStatisctics()
         {

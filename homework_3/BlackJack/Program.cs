@@ -6,7 +6,7 @@
         {
             #region task-1
             //Згенерувати впорядковану колоду карт
-            PlayingCards cards = new PlayingCards();
+            Deck cards = new Deck();
             cards.PrintCards();
             Console.WriteLine();
             #endregion
