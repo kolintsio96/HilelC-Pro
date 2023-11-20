@@ -31,7 +31,7 @@
             player2.Add(cards[2]);
             player2.Add(cards[3]);
 
-            while (!userStopped && !computerStopped)
+            while (!(userStopped && computerStopped))
             {
                 if (isUser)
                 {
@@ -111,7 +111,7 @@
         private void PlayUser(List<Card> player, Card[] cards)
         {
             Console.WriteLine($"You have {CountPoints(player)} points!");
-            if (!userStopped)
+            if (!userStopped && CountPoints(player) < 20)
             {
                 Command input = ReadCommand();
 
@@ -129,6 +129,9 @@
                         PlayUser(player, cards);
                         break;
                 }
+            } else
+            {
+                userStopped = true;
             }
         }
         private void PlayComputer(List<Card> player, Card[] cards)
