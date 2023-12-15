@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homework_1", "homework_1\ho
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homework_2", "homework_2\homework_2\homework_2.csproj", "{02A113FD-ABE4-4ABC-8C85-F11DCFB1C2D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackJack", "homework_3\BlackJack\BlackJack.csproj", "{DBDEFF7F-A0B7-42C5-9C34-90F6C5C67C6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlackJack", "homework_3\BlackJack\BlackJack.csproj", "{DBDEFF7F-A0B7-42C5-9C34-90F6C5C67C6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LINQ", "..\HilelPro\LINQ\LINQ.csproj", "{FE7B399C-28D7-4528-92AF-17AC6153CC6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{DBDEFF7F-A0B7-42C5-9C34-90F6C5C67C6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBDEFF7F-A0B7-42C5-9C34-90F6C5C67C6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBDEFF7F-A0B7-42C5-9C34-90F6C5C67C6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE7B399C-28D7-4528-92AF-17AC6153CC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE7B399C-28D7-4528-92AF-17AC6153CC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE7B399C-28D7-4528-92AF-17AC6153CC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE7B399C-28D7-4528-92AF-17AC6153CC6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
