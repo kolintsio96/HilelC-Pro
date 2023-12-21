@@ -47,7 +47,7 @@ internal class Program
         Console.WriteLine(string.Join("", data
             .OfType<Film>()
             .SelectMany(film => film.Actors, (film, actor) => actor.Name))
-            .Replace(" ", "")
+            .Where(letter => letter != ' ')
             .Distinct()
             .Count());
         Console.WriteLine(string.Join(", ", data
