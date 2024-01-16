@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlackJack", "homework_3\Bla
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LINQ", "LINQ\LINQ.csproj", "{FE7B399C-28D7-4528-92AF-17AC6153CC6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LINQ2", "LINQ2\LINQ2.csproj", "{A52D66AD-506A-4707-B58A-96EB17DE66B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LINQ2", "LINQ2\LINQ2.csproj", "{A52D66AD-506A-4707-B58A-96EB17DE66B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Threads", "Threads\Threads.csproj", "{68FB9D8F-8029-49FC-94EE-582B891255A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{A52D66AD-506A-4707-B58A-96EB17DE66B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A52D66AD-506A-4707-B58A-96EB17DE66B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A52D66AD-506A-4707-B58A-96EB17DE66B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68FB9D8F-8029-49FC-94EE-582B891255A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68FB9D8F-8029-49FC-94EE-582B891255A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68FB9D8F-8029-49FC-94EE-582B891255A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68FB9D8F-8029-49FC-94EE-582B891255A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
