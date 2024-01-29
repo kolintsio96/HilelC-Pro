@@ -8,6 +8,7 @@ namespace Server
     {
         private readonly TcpClient client;
         private readonly NetworkStream stream;
+        private readonly List<User> userList;
 
         public EndPoint? EndPoint => client?.Client?.RemoteEndPoint;
 
@@ -15,6 +16,7 @@ namespace Server
         {
             this.client = client;
             this.stream = client.GetStream();
+            this.userList = new List<User>();
         }
 
         public Task StartReadAsync()
@@ -25,7 +27,22 @@ namespace Server
                 while (true)
                 {
                     var msg = await reader.ReadLineAsync();
-                    Console.WriteLine($"[{EndPoint}] Message: {msg}");
+                    var splittedMsg = msg.Split("#");
+                    switch (splittedMsg[0])
+                    {
+                        case "User":
+                            User user = ParseUser(splittedMsg[1]);
+                            userList.Add(user);
+                            break;
+                        case "Login":
+                            User loginData = ParseUser(splittedMsg[1]);
+                            bool loginSuccess = userList.FindAll(user => user.Email == loginData.Email && user.Password == loginData.Password).Count() > 0;
+                            await SendMessage($"{EndPoint}@Auth={loginSuccess}");
+                            break;
+                        default:
+                            Console.WriteLine($"[{EndPoint}] Message: {msg}");
+                            break;
+                    }
                     MessageReceived?.Invoke(this, msg);
                 }
             });
@@ -38,6 +55,31 @@ namespace Server
             var writer = new StreamWriter(stream);
             await writer.WriteLineAsync(message);
             await writer.FlushAsync();
+        }
+
+        private User ParseUser(string msg)
+        {
+            User user = new User();
+            var splittedMsg = msg.Split("&");
+            foreach (var item in splittedMsg)
+            {
+                var pair = item.Split("=");
+                
+                switch (pair[0])
+                {
+                    case "Name":
+                        user.Name = pair[1];
+                        break;
+                    case "Email":
+                        user.Email = pair[1];
+                        break;
+                    case "Password":
+                        user.Password = pair[1];
+                        break;
+                }
+            }
+
+            return user;
         }
     }
 
@@ -80,7 +122,7 @@ namespace Server
                     chatClient.MessageReceived += ChatClient_MessageReceived;
                     clients.Add(chatClient);
 
-                    chatClient.StartReadAsync();
+                    await chatClient.StartReadAsync();
                 }
             }
             finally
@@ -92,6 +134,7 @@ namespace Server
 
         private static async void ChatClient_MessageReceived(object? sender, string? message)
         {
+            if (message.IndexOf("Login#") != -1 || message.IndexOf("User#") != -1) return;
             var chatClient = (ChatClient?)sender;
             foreach (var client in clients)
             {

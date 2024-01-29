@@ -1,10 +1,10 @@
-﻿namespace Client
+﻿namespace Server
 {
     public struct User
     {
-        string? Name { get; }
-        string? Email { get; }
-        string? Password { get; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
 
         public User(string? name, string? email, string? password)
         {

@@ -1,17 +1,13 @@
-﻿using System.IO.MemoryMappedFiles;
+﻿using System.IO;
+using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
-using System.Text.Json;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text.RegularExpressions;
 
 namespace Client
 {
     public class Authorization
     {
-        private Options ReadOperation()
+        private static Options ReadOperation()
         {
             Console.Write("""
                     1. Login 
@@ -38,93 +34,57 @@ namespace Client
             return result;
         }
 
-        private Task<bool> Login()
+        private static string ReadString(string message, bool isEmail = false)
         {
-            return Task.Run(() =>
-            {
-                Console.Write("Enter email: ");
-                string? email = Console.ReadLine();
-                Console.Write("Enter password: ");
-                string? password = Console.ReadLine();
+            Console.Write(message);
+            string? input = Console.ReadLine();
+            string regex = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov)$";
 
-                return true;
-            });
+            if (String.IsNullOrEmpty(input))
+            {
+                Console.WriteLine("Field can not be null or empty");
+                return ReadString(message);
+            } else if (isEmail && !Regex.IsMatch(input, regex, RegexOptions.IgnoreCase))
+            {
+                Console.WriteLine("Email is invalid!");
+                return ReadString(message);
+            }
+            return input;
+
         }
 
-        private Task Registration()
+        private static Task Login(StreamWriter writer)
         {
             return Task.Run(async () =>
             {
-                Console.Write("Enter name: ");
-                string? name = Console.ReadLine();
-                Console.Write("Enter email: ");
-                string? email = Console.ReadLine();
-                Console.Write("Enter password: ");
-                string? password = Console.ReadLine();
+               
+                string? email = ReadString("Enter email: ", true);
+                string? password = ReadString("Enter password: ");
+
+                await Write(writer, $"Login#Email={email}&Password={password}");
+            });
+        }
+
+        private static Task Registration(StreamWriter writer)
+        {
+            return Task.Run(() =>
+            {
+                string? name = ReadString("Enter name: ");
+                string? email = ReadString("Enter email: ", true);
+                string? password = ReadString("Enter password: ");
 
                 User user = new User(name, email, password);
 
-                await SerializeToMemoryMappedFile(user);
-                List<User> userList = await DeserializeFromMemoryMappedFile();
-                Console.WriteLine(userList.Count);
-                Console.ReadLine();
+                return Write(writer, user.ToString());
             });
         }
 
-        private Task SerializeToMemoryMappedFile(User user)
-        {
-            return Task.Run(() =>
-            {
-                try
-                {
-                    string json = JsonSerializer.Serialize(new List<User>() { user });
-
-                    byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
-
-                    using (MemoryMappedFile mmf = MemoryMappedFile.CreateOrOpen("UserListMappedFile", jsonBytes.Length))
-                    {
-                        using (MemoryMappedViewAccessor accessor = mmf.CreateViewAccessor())
-                        {
-                            accessor.WriteArray(0, jsonBytes, 0, jsonBytes.Length);
-                        }
-                    }
-                    Console.WriteLine("Data written to memory-mapped file.");
-                } catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-            });
-        }
-
-        private Task<List<User>?> DeserializeFromMemoryMappedFile()
-        {
-            return Task.Run(() =>
-            {
-                try
-                {
-                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("UserListMappedFile"))
-                    {
-                        using (MemoryMappedViewAccessor accessor = mmf.CreateViewAccessor())
-                        {
-                            byte[] jsonBytes = new byte[accessor.Capacity];
-                            accessor.ReadArray(0, jsonBytes, 0, jsonBytes.Length);
-
-                            string json = System.Text.Encoding.UTF8.GetString(jsonBytes);
-                            return JsonSerializer.Deserialize<List<User>>(json);
-                        }
-                    }
-                } catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    return new List<User>();
-                }
-            });
-        }
-
-        public Task Process(Action startChat)
+        public static Task Process(NetworkStream stream)
         {
             return Task.Run(async () =>
             {
+                var reader = new StreamReader(stream);
+                var writer = new StreamWriter(stream);
                 while (true)
                 {
                     Console.Clear();
@@ -133,21 +93,40 @@ namespace Client
                     switch (input)
                     {
                         case Options.Login:
-                            bool loginSuccess = await Login();
-                           
-                            if (loginSuccess)
+                            await Login(writer);
+                            bool stopWhile = false;
+                            var endPoint = stream.Socket.LocalEndPoint;
+                            while (!stopWhile)
                             {
-                                Console.WriteLine("Login success!");
-                                startChat();
-                            }
-                            else
-                            {
-                                Console.WriteLine("Login error!");
-                                Console.ReadLine();
+                                var msg = await reader.ReadLineAsync();
+                                if (!string.IsNullOrEmpty(msg))
+                                {
+                                    var splittedMsg = msg.Split("@");
+                                    if (splittedMsg[0] == endPoint?.ToString())
+                                    {
+                                        if (splittedMsg[1].IndexOf("Auth") != -1)
+                                        {
+                                            var auth = splittedMsg[1].Split("=");
+                                            if (auth[1] == "False")
+                                            {
+                                                Console.WriteLine("Login error!");
+                                                Console.ReadLine();
+                                                stopWhile = true;
+                                            } else
+                                            {
+                                                Console.Clear();
+                                                Console.WriteLine("Login success!");
+                                                var readTask = Read(stream, reader);
+                                                var writeTask = Write(writer);
+                                                Task.WaitAll(readTask, writeTask);
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             break;
                         case Options.Registration:
-                            await Registration();
+                            await Registration(writer);
                             break;
                         case Options.Exit:
                             Console.WriteLine("Exiting program");
@@ -158,6 +137,46 @@ namespace Client
                             break;
                     }
                     Console.Clear();
+                }
+            });
+        }
+
+        static Task Write(StreamWriter writer, string message = "")
+        {
+            return Task.Run(async () =>
+            {
+                if (string.IsNullOrEmpty(message))
+                {
+                    while (true)
+                    {
+                        var text = Console.ReadLine();
+                        await writer.WriteLineAsync(text);
+                        await writer.FlushAsync();
+                    }
+                } else
+                {
+                    await writer.WriteLineAsync(message);
+                    await writer.FlushAsync();
+                }
+            });
+        }
+
+        static Task Read(NetworkStream stream, StreamReader reader)
+        {
+            return Task.Run(async () =>
+            {
+                var endPoint = stream.Socket.LocalEndPoint;
+                while (true)
+                {
+                    var msg = await reader.ReadLineAsync();
+                    if (!string.IsNullOrEmpty(msg))
+                    {
+                        var splittedMsg = msg.Split("@");
+                        if (splittedMsg[0] != endPoint?.ToString())
+                        {
+                            Console.WriteLine(msg);
+                        }
+                    }
                 }
             });
         }
