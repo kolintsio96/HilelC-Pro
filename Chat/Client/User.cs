@@ -1,6 +1,6 @@
 ﻿namespace Client
 {
-    public struct User
+    public class User
     {
         string? Name { get; }
         string? Email { get; }

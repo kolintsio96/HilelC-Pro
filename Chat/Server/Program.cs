@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Server
 {
@@ -9,6 +11,7 @@ namespace Server
         private readonly TcpClient client;
         private readonly NetworkStream stream;
         private readonly List<User> userList;
+        private readonly List<string> history;
 
         public EndPoint? EndPoint => client?.Client?.RemoteEndPoint;
 
@@ -17,6 +20,7 @@ namespace Server
             this.client = client;
             this.stream = client.GetStream();
             this.userList = new List<User>();
+            this.history = new List<string>();
         }
 
         public Task StartReadAsync()
@@ -27,6 +31,8 @@ namespace Server
                 while (true)
                 {
                     var msg = await reader.ReadLineAsync();
+                    history.Add(new History($"[{EndPoint}]: {msg}").Log);
+                    await SaveToFile();
                     var splittedMsg = msg.Split("#");
                     switch (splittedMsg[0])
                     {
@@ -80,6 +86,17 @@ namespace Server
             }
 
             return user;
+        }
+
+        public Task SaveToFile(string path = "")
+        {
+            return Task.Run(() =>
+            {
+                string fileName = "History.json";
+                string filePath = Path.Combine(path == "" ? Directory.GetCurrentDirectory() : path, fileName);
+                string jsonData = JsonSerializer.Serialize(history, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, jsonData);
+            });
         }
     }
 
