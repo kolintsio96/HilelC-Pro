@@ -33,23 +33,32 @@ namespace Server
                     var msg = await reader.ReadLineAsync();
                     history.Add(new History($"[{EndPoint}]: {msg}").Log);
                     await SaveToFile();
-                    var splittedMsg = msg.Split("#");
-                    switch (splittedMsg[0])
-                    {
-                        case "User":
-                            User user = ParseUser(splittedMsg[1]);
-                            userList.Add(user);
-                            break;
-                        case "Login":
-                            User loginData = ParseUser(splittedMsg[1]);
-                            bool loginSuccess = userList.FindAll(user => user.Email == loginData.Email && user.Password == loginData.Password).Count() > 0;
-                            await SendMessage($"{EndPoint}@Auth={loginSuccess}");
-                            break;
-                        default:
-                            Console.WriteLine($"[{EndPoint}] Message: {msg}");
-                            break;
-                    }
+                    await ParseMessage(msg);
                     MessageReceived?.Invoke(this, msg);
+                }
+            });
+        }
+
+        private Task ParseMessage(string msg)
+        {
+            return Task.Run(async () =>
+            {
+                var splittedMsg = msg.Split("#"); 
+                switch (splittedMsg[0])
+                {
+                    case "User":
+                        User user = ParseUser(splittedMsg[1]);
+                        userList.Add(user);
+                        break;
+                    case "Login":
+                        User loginData = ParseUser(splittedMsg[1]);
+                        User loginnedUser = userList.Find(user => user.Email == loginData.Email && user.Password == loginData.Password);
+                        bool loginSuccess = loginnedUser.Email != null;
+                        await SendMessage($"{EndPoint}#Auth={loginSuccess}&{loginnedUser}");
+                        break;
+                    default:
+                        Console.WriteLine($"[{EndPoint}] Message: {msg}");
+                        break;
                 }
             });
         }
@@ -155,7 +164,7 @@ namespace Server
             var chatClient = (ChatClient?)sender;
             foreach (var client in clients)
             {
-                await client.SendMessage($"{chatClient?.EndPoint}@{message}");
+                await client.SendMessage($"{chatClient?.EndPoint}#{message}");
             }
         }
     }

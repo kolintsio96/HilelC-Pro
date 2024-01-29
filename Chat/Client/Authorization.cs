@@ -7,6 +7,7 @@ namespace Client
 {
     public class Authorization
     {
+        static User? AuthUser { get; set; }
         private static Options ReadOperation()
         {
             Console.Write("""
@@ -94,32 +95,34 @@ namespace Client
                     {
                         case Options.Login:
                             await Login(writer);
-                            bool stopWhile = false;
+                            bool loginError = false;
                             var endPoint = stream.Socket.LocalEndPoint;
-                            while (!stopWhile)
+                            while (!loginError)
                             {
                                 var msg = await reader.ReadLineAsync();
                                 if (!string.IsNullOrEmpty(msg))
                                 {
-                                    var splittedMsg = msg.Split("@");
-                                    if (splittedMsg[0] == endPoint?.ToString())
+                                    var splittedMsg = msg.Split("#");
+                                    if (splittedMsg[0] == endPoint?.ToString() && splittedMsg[1].IndexOf("Auth") != -1)
                                     {
-                                        if (splittedMsg[1].IndexOf("Auth") != -1)
+                                        var data = splittedMsg[1].Split("&");
+                                        var auth = data[0].Split("=");
+                                        if (auth[1] == "False")
                                         {
-                                            var auth = splittedMsg[1].Split("=");
-                                            if (auth[1] == "False")
-                                            {
-                                                Console.WriteLine("Login error!");
-                                                Console.ReadLine();
-                                                stopWhile = true;
-                                            } else
-                                            {
-                                                Console.Clear();
-                                                Console.WriteLine("Login success!");
-                                                var readTask = Read(stream, reader);
-                                                var writeTask = Write(writer);
-                                                Task.WaitAll(readTask, writeTask);
-                                            }
+                                            Console.WriteLine("Login error!");
+                                            Console.ReadLine();
+                                            loginError = true;
+                                        }
+                                        else
+                                        {
+                                            Console.Clear();
+                                            Console.WriteLine("Login success!");
+
+                                            CreateAuthUser(splittedMsg[2]);
+
+                                            var readTask = Read(stream, reader);
+                                            var writeTask = Write(writer);
+                                            Task.WaitAll(readTask, writeTask);
                                         }
                                     }
                                 }
@@ -139,6 +142,15 @@ namespace Client
                     Console.Clear();
                 }
             });
+        }
+
+        static void CreateAuthUser(string msg)
+        {
+            var fieldsPairs = msg.Split("&");
+            string name = fieldsPairs[0].Split("=")[1];
+            string email = fieldsPairs[1].Split("=")[1];
+            string password = fieldsPairs[2].Split("=")[1];
+            AuthUser = new User(name, email, password);
         }
 
         static Task Write(StreamWriter writer, string message = "")
@@ -171,10 +183,26 @@ namespace Client
                     var msg = await reader.ReadLineAsync();
                     if (!string.IsNullOrEmpty(msg))
                     {
-                        var splittedMsg = msg.Split("@");
+                        var splittedMsg = msg.Split("#");
                         if (splittedMsg[0] != endPoint?.ToString())
                         {
-                            Console.WriteLine(msg);
+                            if (splittedMsg[1].StartsWith("@"))
+                            {
+                                string pattern = @"@([^:\s]+)";
+                                Match match = Regex.Match(splittedMsg[1], pattern);
+                                if (match.Success)
+                                {
+                                    string name = match.Groups[1].Value;
+                                    if (name == AuthUser?.Name)
+                                    {
+                                        Console.WriteLine(msg);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine(msg);
+                            }
                         }
                     }
                 }

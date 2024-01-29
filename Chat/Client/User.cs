@@ -2,7 +2,7 @@
 {
     public class User
     {
-        string? Name { get; }
+        public string? Name { get; }
         string? Email { get; }
         string? Password { get; }
 
