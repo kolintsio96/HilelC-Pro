@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace Server
 {
@@ -45,7 +43,7 @@ namespace Server
                     chatClient.MessageReceived += ChatClient_MessageReceived;
                     clients.Add(chatClient);
 
-                    await chatClient.StartReadAsync();
+                    chatClient.StartReadAsync();
                 }
             }
             finally
