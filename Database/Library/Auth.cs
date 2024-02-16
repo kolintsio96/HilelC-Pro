@@ -1,7 +1,5 @@
 ﻿using AccessToDB;
 using System.Text.RegularExpressions;
-using AccessToDB;
-using System.Linq;
 
 namespace Library
 {
@@ -64,21 +62,56 @@ namespace Library
 
         private void Login()
         {
+            string? userType = ReadString("Do you reader(y/n): ");
+            bool isReader = userType.ToLower() == "y" || userType.ToLower() == "yes";
             string? email = ReadString("Enter email: ", true);
             string? password = ReadString("Enter password: ");
-            bool loginSuccess = Ctx.Librarians.FirstOrDefault(l => l.Email == email && l.Password == password) != null;
-            Console.WriteLine($"Login {(loginSuccess ? "success" : "unsuccess")}");
-            Console.ReadKey();
+            bool loginSuccess = false;
+            IUser? user;
+            if (isReader)
+            {
+                user = Ctx.Readers.FirstOrDefault(l => l.Email == email && l.Password == password);
+            } else
+            {
+                user = Ctx.Librarians.FirstOrDefault(l => l.Email == email && l.Password == password);
+            }
+            loginSuccess = user != null;
+            if (loginSuccess)
+            {
+                if (isReader)
+                {
+                    new ReaderActions(Ctx, user);
+                } else
+                {
+                    new LibrarianActions(Ctx, user);
+                }
+            }
         }
 
         private void Registration()
         {
+            string? userType = ReadString("Do you reader(y/n): ");
+            bool isReader = userType.ToLower() == "y" || userType.ToLower() == "yes";
             string? login = ReadString("Enter login: ");
             string? email = ReadString("Enter email: ", true);
             string? password = ReadString("Enter password: ");
-            Ctx.Librarians.Add(new Librarian() { Login = login, Email = email, Password = password });
+
+            if (isReader)
+            {
+                string? name = ReadString("Enter name: ");
+                string? surname = ReadString("Enter surname: ");
+                string? documentType = ReadString("Enter document type: ");
+                int documentTypeId = Ctx.Documents.FirstOrDefault(d => d.Type == documentType)!.Id;
+                string? documentNumber = ReadString("Enter document number: ");
+                string? librarianLogin = ReadString("Enter librarian login: ");
+                int librarianId = Ctx.Librarians.FirstOrDefault(d => d.Login == librarianLogin)!.Id;
+                Ctx.Readers.Add(new Reader() { Login = login, Email = email, Password = password, Name = name, Surname = surname, DocumentNumber = documentNumber, DocumentTypeId = documentTypeId, LibrarianId = librarianId });
+            } else
+            {
+                Ctx.Librarians.Add(new Librarian() { Login = login, Email = email, Password = password });
+            }
             Ctx.SaveChanges();
-            Console.WriteLine("Librarian registration was successful!");
+            Console.WriteLine($"{(isReader ? "Reader" : "Librarian")} registration was successful!");
             Console.ReadKey();
         }
 

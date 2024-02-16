@@ -1,6 +1,6 @@
 ﻿namespace AccessToDB;
 
-public partial class Librarian
+public class Librarian : IUser
 {
     public int Id { get; set; }
 
