@@ -6,7 +6,6 @@ public partial class LibraryContext : DbContext
 {
     public LibraryContext()
     {
-        Database.EnsureCreated();
     }
 
     public virtual DbSet<Author> Authors { get; set; }
@@ -20,6 +19,8 @@ public partial class LibraryContext : DbContext
     public virtual DbSet<PublishingHouse> PublishingHouses { get; set; }
 
     public virtual DbSet<Reader> Readers { get; set; }
+    
+    public virtual DbSet<History> Histories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -31,7 +32,7 @@ public partial class LibraryContext : DbContext
     {
         modelBuilder.Entity<Author>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Authors__3213E83F0AF23D61");
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id);
             entity.Property(e => e.Birthday)
@@ -47,15 +48,11 @@ public partial class LibraryContext : DbContext
                     "AuthorBook",
                     r => r.HasOne<Book>().WithMany()
                         .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__AuthorBoo__bookI__49C3F6B7"),
-                    l => l.HasOne<Author>().WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__AuthorBoo__autho__48CFD27E"),
+                        .OnDelete(DeleteBehavior.ClientSetNull),
+                    l => l.HasOne<Author>().WithMany().HasForeignKey("AuthorId").OnDelete(DeleteBehavior.ClientSetNull),
                     j =>
                     {
-                        j.HasKey("AuthorId", "BookId").HasName("PK__AuthorBo__46996BA909D4D79D");
+                        j.HasKey("AuthorId", "BookId");
                         j.ToTable("AuthorBooks");
                         j.IndexerProperty<int>("AuthorId");
                         j.IndexerProperty<int>("BookId");
@@ -64,7 +61,7 @@ public partial class LibraryContext : DbContext
 
         modelBuilder.Entity<Book>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Books__3213E83F830CD8C0");
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id);
             entity.Property(e => e.City);
@@ -73,18 +70,16 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.PublishKey);
             entity.Property(e => e.PublishingHousesType).IsRequired();
             entity.Property(e => e.Year).IsRequired();
+            entity.Property(e => e.BookingTime).HasDefaultValue(30);
 
-            entity.HasOne(d => d.PublishingHousesTypeNavigation).WithMany(p => p.Books)
-                .HasForeignKey(d => d.PublishingHousesType)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Books__publishin__44FF419A");
+            entity.HasOne(d => d.PublishingHousesTypeNavigation).WithMany(p => p.Books).HasForeignKey(d => d.PublishingHousesType).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<Book>().ToTable(t => t.HasCheckConstraint("CK_MaxMinYear", "Year between 1900 and 2024"));
 
         modelBuilder.Entity<Document>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Document__3213E83F6B18BB8D");
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id);
             entity.Property(e => e.Type).IsRequired();
@@ -92,7 +87,7 @@ public partial class LibraryContext : DbContext
 
         modelBuilder.Entity<Librarian>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Libraria__3213E83F6C706801");
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id);
             entity.Property(e => e.Email).IsRequired();
@@ -102,7 +97,7 @@ public partial class LibraryContext : DbContext
 
         modelBuilder.Entity<PublishingHouse>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Publishi__3213E83FA44B0A0A");
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id);
             entity.Property(e => e.Type).IsRequired();
@@ -110,7 +105,7 @@ public partial class LibraryContext : DbContext
 
         modelBuilder.Entity<Reader>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Readers__3213E83F87F02B2E");
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id);
             entity.Property(e => e.DocumentNumber);
@@ -122,15 +117,31 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Password).IsRequired();
             entity.Property(e => e.Surname);
 
-            entity.HasOne(d => d.DocumentType).WithMany(p => p.Readers)
-                .HasForeignKey(d => d.DocumentTypeId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Readers__documen__38996AB5");
+            entity.HasOne(d => d.DocumentType).WithMany(p => p.Readers).HasForeignKey(d => d.DocumentTypeId).OnDelete(DeleteBehavior.ClientSetNull);
 
             entity.HasOne(d => d.Librarian).WithMany(p => p.Readers)
                 .HasForeignKey(d => d.LibrarianId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Readers__librari__398D8EEE");
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<History>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id);
+            entity.Property(e => e.BookId).IsRequired();
+            entity.Property(e => e.ReaderId).IsRequired();
+            entity.Property(e => e.TakeDate).IsRequired();
+            entity.Property(e => e.ReturnDate);
+            entity.Property(e => e.BookingTime).IsRequired();
+
+            entity.HasOne(d => d.Book).WithMany(p => p.Histories)
+                .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Reader).WithMany(p => p.Histories)
+                .HasForeignKey(d => d.ReaderId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         OnModelCreatingPartial(modelBuilder);

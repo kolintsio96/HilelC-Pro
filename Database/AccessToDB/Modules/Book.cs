@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace AccessToDB;
+﻿namespace AccessToDB;
 
 public partial class Book
 {
     public int Id { get; set; }
 
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
     public string? PublishKey { get; set; }
 
@@ -19,7 +16,11 @@ public partial class Book
 
     public string? City { get; set; }
 
+    public int BookingTime { get; set; }
+
     public virtual PublishingHouse PublishingHousesTypeNavigation { get; set; } = null!;
 
     public virtual ICollection<Author> Authors { get; set; } = new List<Author>();
+
+    public virtual ICollection<History> Histories { get; set; } = new List<History>();
 }

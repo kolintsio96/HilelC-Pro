@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace AccessToDB;
 
-namespace AccessToDB;
-
-public partial class Reader
+public class Reader : IUser
 {
     public int Id { get; set; }
 
@@ -26,4 +23,6 @@ public partial class Reader
     public virtual Document DocumentType { get; set; } = null!;
 
     public virtual Librarian Librarian { get; set; } = null!;
+
+    public virtual ICollection<History> Histories { get; set; } = new List<History>();
 }
