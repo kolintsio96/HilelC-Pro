@@ -4,7 +4,8 @@ namespace AccessToDB;
 
 public partial class LibraryContext : DbContext
 {
-    public LibraryContext()
+    public LibraryContext(DbContextOptions<LibraryContext> options)
+            : base(options)
     {
     }
 
@@ -116,8 +117,6 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Password).IsRequired();
             entity.Property(e => e.Surname);
-
-            entity.HasOne(d => d.DocumentType).WithMany(p => p.Readers).HasForeignKey(d => d.DocumentTypeId).OnDelete(DeleteBehavior.ClientSetNull);
 
             entity.HasOne(d => d.Librarian).WithMany(p => p.Readers)
                 .HasForeignKey(d => d.LibrarianId)

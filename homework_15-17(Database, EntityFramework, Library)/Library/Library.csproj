@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AccessToDB\AccessToDB.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="AccessToDB">
       <HintPath>..\AccessToDB\bin\Debug\net7.0\AccessToDB.dll</HintPath>
     </Reference>
