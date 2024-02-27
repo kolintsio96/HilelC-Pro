@@ -16,13 +16,11 @@ namespace Services
         {
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtInfo:JwtKey"] ?? throw new ArgumentNullException("TokenKey")));
         }
-        public string GetToken(Reader reader)
+        public string GetToken(IUser user)
         {
             var claims = new List<Claim>
             {
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.NameId, reader.Login),
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, reader.Email),
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Name, reader.Name)
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, user.Email)
             };
 
             var signature = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);

@@ -3,7 +3,7 @@ namespace Common.Repositories
 {
     public interface IReaderRepository
     {
-        Task<Reader?> GetReaderByEmail(string login);
+        Task<Reader?> GetReaderByEmail(string email);
         
         Task<Reader> CreateReader(Reader reader);
 

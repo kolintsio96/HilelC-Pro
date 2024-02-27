@@ -1,11 +1,8 @@
-﻿using Common;
-using Common.Repositories;
+﻿using AccessToDB;
 using Common.Services;
-using AccessToDB;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Dtos;
-using Microsoft.AspNetCore.Authorization;
-using System.IO.Pipelines;
 
 namespace WebAPI.Controllers
 {
@@ -14,17 +11,11 @@ namespace WebAPI.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
-        private readonly IReaderRepository _readerRepository;
-        private readonly ILibrarianRepository _librarianRepository;
-        private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAccountService accountService, IReaderRepository readerRepository, ILibrarianRepository librarianRepository, IDocumentRepository documentRepository, ILogger<AccountController> logger)
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger)
         {
             this._accountService = accountService;
-            this._readerRepository = readerRepository;
-            this._librarianRepository = librarianRepository;
-            this._documentRepository = documentRepository;
             this._logger = logger;
         }
 
@@ -35,48 +26,15 @@ namespace WebAPI.Controllers
             _logger.LogInformation($"Try login by - {loginDto.Email}");
             try
             {
-                var result = await _accountService.Login(loginDto.Email, loginDto.Password);
-                if (result.reader == null) return NotFound(loginDto.Email);
-                return Ok(new { result.reader, result.token });
+                var result = await _accountService.Login(loginDto.Email, loginDto.Password, loginDto.IsReader);
+                if (result.account == null) return NotFound(loginDto.Email);
+                return Ok(new { result.account, result.token });
             }
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogError(ex, ex.Message);
                 return Unauthorized(loginDto.Email);
             }
-        }
-
-        [AllowAnonymous]
-        [HttpPost("register/reader")]
-        public async Task<IActionResult> Register(ReaderDto readerDto)
-        {
-            _logger.LogInformation($"Register begin process with reader dto - {readerDto}");
-            var reader = new Reader() {
-                Login = readerDto.Login,
-                Email = readerDto.Email,
-                Password = readerDto.Email,
-                Name = readerDto.Name,
-                Surname = readerDto.Surname,
-                DocumentNumber = readerDto.DocumentNumber,
-                DocumentTypeId = readerDto.DocumentId,
-                LibrarianId = readerDto.LibrarianId
-            };
-
-            var result = await _accountService.Register(reader);
-            return Created("api/Account/" + reader.Id, new { reader, result.token });
-        }
-
-        [Authorize]
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAccount(int id)
-        {
-            _logger.LogInformation($"Get account by id - {id}");
-
-            var reader = await _readerRepository.GetReader(id);
-            if (reader != null)
-                return Ok(reader);
-
-            return NotFound("Account not found!");
         }
     }
 }

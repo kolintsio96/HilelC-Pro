@@ -20,7 +20,7 @@ namespace Repositories
         
         public Task<List<Document>> GetDocuments()
         {
-            return _context.Documents.ToListAsync();
+            return _context.Documents.AsNoTracking().ToListAsync();
         }
     }
 }

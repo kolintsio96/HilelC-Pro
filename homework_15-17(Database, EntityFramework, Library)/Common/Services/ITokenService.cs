@@ -3,6 +3,6 @@ namespace Common.Services
 {
     public interface ITokenService
     {
-        string GetToken(Reader reader);
+        string GetToken(IUser user);
     }
 }

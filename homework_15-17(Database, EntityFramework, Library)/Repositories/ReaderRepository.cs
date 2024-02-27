@@ -33,7 +33,7 @@ namespace Repositories
 
         public Task<List<Reader>> GetReaders()
         {
-            return _context.Readers.ToListAsync();
+            return _context.Readers.AsNoTracking().ToListAsync();
         }
     }
 }

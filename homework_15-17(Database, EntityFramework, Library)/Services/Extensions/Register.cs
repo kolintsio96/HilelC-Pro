@@ -8,6 +8,8 @@ namespace Services.Extensions
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IReaderService, ReaderService>();
+            services.AddScoped<ILibrarianService, LibrarianService>();
             services.AddScoped<ITokenService, TokenService>();
             return services;
         }

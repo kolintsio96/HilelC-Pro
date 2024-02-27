@@ -7,30 +7,33 @@ namespace Services
     internal class AccountService : IAccountService
     {
         private readonly IReaderRepository _readerRepository;
+        private readonly ILibrarianRepository _librarianRepository;
         private readonly ITokenService _tokenService;
 
-        public AccountService(IReaderRepository userRepository, ITokenService tokenService)
+        public AccountService(IReaderRepository readerRepository, ILibrarianRepository librarianRepository, ITokenService tokenService)
         {
-            this._readerRepository = userRepository;
+            this._readerRepository = readerRepository;
+            this._librarianRepository = librarianRepository;
             this._tokenService = tokenService;
         }
-        public async Task<(Reader? reader, string token)> Login(string login, string password)
+
+        public async Task<(IUser? account, string token)> Login(string login, string password, bool isReader = false)
         {
-            var reader = await _readerRepository.GetReaderByEmail(login);
-            if (reader == null) return (null, null!);
-            if (reader.Password != password)
+            IUser? account = null;
+            if (isReader)
+            {
+                account = await _readerRepository.GetReaderByEmail(login);
+            } else
+            {
+                account = await _librarianRepository.GetLibrarianByEmail(login);
+            }
+            
+            if (account == null) return (null, null!);
+            if (account.Password != password)
                 throw new UnauthorizedAccessException();
 
-            var token = _tokenService.GetToken(reader);
-            return (reader, token);
-        }
-
-        public async Task<(Reader reader, string token)> Register(Reader reader)
-        {
-            reader = await _readerRepository.CreateReader(reader);
-            var token = _tokenService.GetToken(reader);
-
-            return (reader, token);
+            var token = _tokenService.GetToken(account);
+            return (account, token);
         }
     }
 }
