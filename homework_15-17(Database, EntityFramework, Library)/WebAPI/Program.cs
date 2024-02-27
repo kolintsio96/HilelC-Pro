@@ -51,7 +51,7 @@ namespace WebAPI
                 app.UseSwaggerUI();
             }
 
-            app.UseCors(builder => builder.AllowCredentials().AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod().WithOrigins("http://localhost:4000"));
+            app.UseCors(builder => builder.AllowCredentials().AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod().WithOrigins("http://localhost:5000"));
 
             app.UseHttpsRedirection();
 

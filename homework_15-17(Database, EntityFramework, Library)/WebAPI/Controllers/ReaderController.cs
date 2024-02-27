@@ -22,7 +22,7 @@ namespace WebAPI.Controllers
             this._logger = logger;
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(ReaderDto readerDto)
         {
