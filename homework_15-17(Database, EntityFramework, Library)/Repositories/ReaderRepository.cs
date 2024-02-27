@@ -1,7 +1,6 @@
-﻿using Common.Repositories;
-using AccessToDB;
+﻿using AccessToDB;
+using Common.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.PortableExecutable;
 
 namespace Repositories
 {
@@ -21,6 +20,13 @@ namespace Repositories
             return reader;
         }
 
+        public async Task<Reader> DeleteReader(Reader reader)
+        {
+            _context.Readers.Remove(reader);
+            await _context.SaveChangesAsync();
+            return reader;
+        }
+
         public ValueTask<Reader?> GetReader(int id)
         {
             return _context.Readers.FindAsync(id);
@@ -34,6 +40,13 @@ namespace Repositories
         public Task<List<Reader>> GetReaders()
         {
             return _context.Readers.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<Reader> UpdateReader(Reader reader)
+        {
+            _context.Readers.Attach(reader).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return reader;
         }
     }
 }

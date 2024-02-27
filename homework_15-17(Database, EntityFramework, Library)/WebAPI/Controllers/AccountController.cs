@@ -28,7 +28,15 @@ namespace WebAPI.Controllers
             {
                 var result = await _accountService.Login(loginDto.Email, loginDto.Password, loginDto.IsReader);
                 if (result.account == null) return NotFound(loginDto.Email);
-                return Ok(new { result.account, result.token });
+                if (loginDto.IsReader)
+                {
+                    var account = (Reader)result.account;
+                    return Ok(new { account, result.token });
+                } else
+                {
+                    var account = (Librarian)result.account;
+                    return Ok(new { account, result.token });
+                }
             }
             catch (UnauthorizedAccessException ex)
             {

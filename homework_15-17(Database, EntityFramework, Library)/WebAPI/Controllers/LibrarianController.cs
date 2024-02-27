@@ -59,7 +59,7 @@ namespace WebAPI.Controllers
             if (librarians != null)
                 return Ok(librarians);
 
-            return NotFound("Documents not found!");
+            return NotFound("Librarians not found!");
         }
     }
 }

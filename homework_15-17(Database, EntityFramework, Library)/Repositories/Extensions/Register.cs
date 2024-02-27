@@ -10,6 +10,9 @@ namespace Repositories.Extensions
             services.AddScoped<IReaderRepository, ReaderRepository>();
             services.AddScoped<ILibrarianRepository, LibrarianRepository>();
             services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IHistoryRepository, HistoryRepository>();
+            services.AddScoped<IBookRepository, BookRepository>();
             return services;
         }
     }
